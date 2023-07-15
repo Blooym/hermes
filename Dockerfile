@@ -29,8 +29,8 @@ RUN addgroup -S hermes \
 USER hermes
 
 # Setup socket address.
-ENV HERMES_SOCKETADDR=0.0.0.0:8000
-EXPOSE 8000
+ENV HERMES_SOCKETADDR=0.0.0.0:8080
+EXPOSE 8080
 
 # Setup remote mountpoint.
 RUN mkdir -p /app/remotefs

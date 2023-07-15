@@ -8,7 +8,16 @@ Docker is the recommended way to run Hermes, however it can also be used as a st
 
 It is recommended to place Hermes behind a reverse proxy that can provide a caching layer as remote filesystems can be relatively slow to request from depending on their location relative to the server and the protocol used. You will also need to use a reverse proxy if you wish to use HTTPS as Hermes does not support it natively.
 
-### Supported Protocols
+### Docker
+
+A Hermes docker image with all protocols enabled can be pulled from the GitHub Container Registry. The latest version of available at:
+```
+FROM ghcr.io/blooym/hermes:latest
+```
+
+This image will automatically set a default mountpoint inside the container and a socket address of `0.0.0.0:8080` which can be overridden by setting the appropriate environment variables.
+
+## Supported Protocols
 
 Hermes currently supports the following protocols, contributions are welcome to support more.
 
