@@ -71,10 +71,6 @@ impl ProtocolHandler<'_> for Sshfs {
             options_str,
             self.extra_args
         );
-        println!(
-            "Running command: {}",
-            &cmd.replace(&self.password, "********")
-        );
 
         // Spawn the process and wait for it to finish.
         let proc = process::Command::new("sh")
