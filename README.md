@@ -1,4 +1,6 @@
 # Hermes
+[![Code Changes](https://github.com/Blooym/Hermes/actions/workflows/code_changes.yml/badge.svg)](https://github.com/Blooym/Hermes/actions/workflows/code_changes.yml)
+[![Container Changes](https://github.com/Blooym/Hermes/actions/workflows/container_changes.yml/badge.svg)](https://github.com/Blooym/Hermes/actions/workflows/container_changes.yml)
 
 A simple & lightweight file server that automatically handles remote filesystems and serves them over HTTP.
 
