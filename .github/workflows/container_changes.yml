@@ -1,0 +1,36 @@
+name: "Container Changes"
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+    types: [ready_for_review, opened, synchronize]
+  workflow_dispatch:
+
+jobs:
+  CanBuild:
+    name: "Ensure Container Builds"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: testbuild/testbuild:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
