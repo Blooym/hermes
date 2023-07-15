@@ -36,6 +36,9 @@ EXPOSE 8080
 RUN mkdir -p /app/remotefs
 ENV HERMES_MOUNT_PATH=/app/remotefs
 
+# Set log level
+ENV RUST_LOG=info
+
 # Grab binary from build stage.
 COPY --from=build /build/target/release/hermes /app/bin/hermes
 

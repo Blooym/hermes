@@ -5,8 +5,8 @@ edition = "2021"
 authors = ["Blooym"]
 
 [features]
-default = ["protocol_sshfs"]
-protocol_sshfs = []
+default = ["protocol-sshfs"]
+protocol-sshfs = []
 
 [dependencies]
 tokio = { version = "1.28.2", features = ["full"] }

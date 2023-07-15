@@ -4,12 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-remote_mount = { path = "../remote_mount", features = ["protocol_sshfs"] }
+remote_mount = { path = "../remote_mount", features = ["protocol-sshfs"] }
 clap = { version = "4.3.0", features = ["derive", "env"] }
 axum = { version = "0.6.18" }
 dotenv = "0.15.0"
 tokio = { version = "1.28.2", features = ["full"] }
-tower-http = { version = "0.4.0", features = ["fs"] }
+tower-http = { version = "0.4.0", features = ["fs", "trace"] }
 signal-hook-tokio = { version = "0.3.1", features = ["futures-v0_3"] }
 signal-hook = "0.3.16"
 futures = "0.3.28"
+tracing = "0.1.37"
+tracing-subscriber = { version = "0.3.16", features = ["env-filter"] }

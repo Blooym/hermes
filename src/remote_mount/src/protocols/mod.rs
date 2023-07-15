@@ -3,12 +3,12 @@ use async_trait::async_trait;
 use std::str::FromStr;
 
 pub mod errors;
-#[cfg(feature = "protocol_sshfs")]
+#[cfg(feature = "protocol-sshfs")]
 pub mod sshfs;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Protocols {
-    #[cfg(feature = "protocol_sshfs")]
+    #[cfg(feature = "protocol-sshfs")]
     Sshfs,
 }
 
@@ -16,7 +16,7 @@ impl FromStr for Protocols {
     type Err = String;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            #[cfg(feature = "protocol_sshfs")]
+            #[cfg(feature = "protocol-sshfs")]
             "sshfs" => Ok(Self::Sshfs),
             _ => Err(format!("Invalid protocol: {}", s)),
         }
