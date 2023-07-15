@@ -44,7 +44,7 @@ The following variables are used regardless of the protocol selected.
 | `HERMES_SOCKET_ADDR` | The address to bind the HTTP server to. | `--socket-addr` | `0.0.0.0:8080` | No |
 | `HERMES_MOUNT_PATH` | The path to mount the remote filesystem to. | `--mountpoint` | N/A | Yes |
 | `HERMES_PROTOCOL` | The protocol to use for the remote filesystem. | `--protocol` | N/A | Yes |
-| `RUST_LOG` | The log level to use for messages. | N/A | `INFO` | No |
+| `RUST_LOG` | The log level to use for messages. | N/A | `ERROR` | No |
 
 ### SSHFS
 
