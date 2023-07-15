@@ -10,12 +10,14 @@ It is recommended to place Hermes behind a reverse proxy that can provide a cach
 
 ### Docker
 
-A Hermes docker image with all protocols enabled can be pulled from the GitHub Container Registry. The latest version of available at:
+A prebuilt Docker image with all protocols enabled can be pulled from the GitHub Container Registry. The latest version is available at
 ```
 FROM ghcr.io/blooym/hermes:latest
 ```
 
-This image will automatically set a default mountpoint inside the container and a socket address of `0.0.0.0:8080` which can be overridden by setting the appropriate environment variables.
+You can also use a specific version by replacing `latest` with the version you wish to use. A list of available versions can be found [here](https://github.com/Blooym/hermes/pkgs/container/hermes/versions?filters%5Bversion_type%5D=tagged).
+
+This image will automatically set a default mountpoint inside the container and a socket address of `0.0.0.0:8080` which can be overridden by setting the appropriate environment variables. You will need to pass the `--privileged` flag to the container to allow it to mount the remote filesystem.
 
 ## Supported Protocols
 

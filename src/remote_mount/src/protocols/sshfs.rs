@@ -86,6 +86,11 @@ impl ProtocolHandler<'_> for Sshfs {
         // Return the result.
         match proc {
             Ok(output) => {
+                let stderr = String::from_utf8(output.stderr).unwrap_or_default();
+                if !stderr.is_empty() {
+                    return Err(MountError::MountFailed(stderr));
+                }
+
                 self.mounted = true;
                 Ok(String::from_utf8(output.stdout).unwrap_or_default())
             }
