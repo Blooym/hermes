@@ -1,0 +1,5 @@
+# Build
+/target
+
+# Secrets
+*.env

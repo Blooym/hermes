@@ -1,0 +1,8 @@
+[package]
+name = "remote_mount"
+version = "0.1.0"
+edition = "2021"
+authors = ["Blooym"]
+
+[dependencies]
+tokio = { version = "1.28.2", features = ["full"] }
