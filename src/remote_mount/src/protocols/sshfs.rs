@@ -1,7 +1,12 @@
+use async_trait::async_trait;
+use dotenv::dotenv;
 use std::path::Path;
 use tokio::process;
 
-use crate::errors::{MountError, UnmountError};
+use super::{
+    errors::{MountError, ProtocolError, UnmountError},
+    FromEnv, ProtocolHandler,
+};
 
 /// The sshfs binary to use.
 const SSHFS_BIN: &str = "sshfs";
@@ -10,52 +15,33 @@ const SSHFS_BIN: &str = "sshfs";
 const UMOUNT_BIN: &str = "fusermount";
 
 #[derive(Debug)]
-pub struct SshfsHandler {
+pub struct Sshfs {
     /// Whether the remote filesystem is mounted.
     mounted: bool,
 
     /// The mountpoint of the remote filesystem.
-    pub mountpoint: String,
+    mountpoint: String,
 
     /// The connection string for sshfs.
-    pub connection_string: String,
+    connection_string: String,
 
     /// Options to pass to sshfs.
-    pub options: String,
+    options: String,
 
     /// The password for the sshfs connection.
-    pub password: String,
+    password: String,
 
     /// Additional arguments to pass to sshfs.
-    pub extra_args: String,
+    extra_args: String,
 }
 
-impl SshfsHandler {
-    /// Create a new instance.
-    pub fn new(
-        connection_string: String,
-        mountpoint: String,
-        password: String,
-        options: String,
-        extra_args: String,
-    ) -> Self {
-        Self {
-            mounted: false,
-            mountpoint,
-            connection_string,
-            options,
-            password,
-            extra_args,
-        }
-    }
-
-    /// Returns true if the remote filesystem is mounted.
-    pub fn is_mounted(&self) -> bool {
+#[async_trait]
+impl ProtocolHandler<'_> for Sshfs {
+    fn is_mounted(&self) -> bool {
         self.mounted
     }
 
-    /// Mounts the remote filesystem.
-    pub async fn mount(&mut self) -> Result<String, MountError> {
+    async fn mount(&'_ mut self) -> Result<String, MountError> {
         if self.is_mounted() {
             return Err(MountError::AlreadyMounted);
         }
@@ -107,8 +93,7 @@ impl SshfsHandler {
         }
     }
 
-    /// Unmounts the remote filesystem.
-    pub async fn unmount(&mut self) -> Result<String, UnmountError> {
+    async fn unmount(&mut self) -> Result<String, UnmountError> {
         if !self.is_mounted() {
             return Err(UnmountError::NotMounted);
         }
@@ -126,5 +111,33 @@ impl SshfsHandler {
             }
             Err(e) => Err(UnmountError::UnmountFailed(e.to_string())),
         }
+    }
+}
+
+const CONNECTION_STRING_ENV_VAR: &str = "HERMES_SSHFS_CONNECTION_STRING";
+const PASSWORD_ENV_VAR: &str = "HERMES_SSHFS_PASSWORD";
+const OPTIONS_ENV_VAR: &str = "HERMES_SSHFS_OPTIONS";
+const EXTRA_ARGS_ENV_VAR: &str = "HERMES_SSHFS_EXTRA_ARGS";
+
+impl FromEnv for Sshfs {
+    fn with_mountpoint_from_env(mountpoint: String) -> Result<Self, ProtocolError> {
+        dotenv().ok();
+
+        let connection_string = std::env::var(CONNECTION_STRING_ENV_VAR).map_err(|_| {
+            ProtocolError::MissingConfigurationOption(CONNECTION_STRING_ENV_VAR.to_string())
+        })?;
+        let password = std::env::var(PASSWORD_ENV_VAR)
+            .map_err(|_| ProtocolError::MissingConfigurationOption(PASSWORD_ENV_VAR.to_string()))?;
+        let options = std::env::var(OPTIONS_ENV_VAR).unwrap_or_default();
+        let extra_args = std::env::var(EXTRA_ARGS_ENV_VAR).unwrap_or_default();
+
+        Ok(Sshfs {
+            mounted: false,
+            mountpoint,
+            connection_string,
+            options,
+            password,
+            extra_args,
+        })
     }
 }

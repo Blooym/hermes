@@ -3,3 +3,9 @@
 
 # Secrets
 *.env
+
+# IDE
+.vscode
+
+# Mount testing
+/mnt
