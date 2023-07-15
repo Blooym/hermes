@@ -12,11 +12,13 @@ It is recommended to place Hermes behind a reverse proxy that can provide a cach
 
 Hermes currently supports the following protocols, contributions are welcome to support more.
 
-- SSHFS ✅
-- Samba ❌
-- NFS ❌
-- FTP ❌
-- WebDAV ❌
+| Protocol | Supported |
+| --- | --- |
+| SSHFS | ✅ |
+| Samba | ❌ |
+| NFS | ❌ |
+| FTP | ❌ |
+| WebDAV | ❌ |
 
 ## Configuration
 
