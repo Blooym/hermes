@@ -661,6 +661,8 @@ dependencies = [
 name = "remote_mount"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
+ "dotenv",
  "tokio",
 ]
 

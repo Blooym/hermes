@@ -34,7 +34,7 @@ EXPOSE 8000
 
 # Setup remote mountpoint.
 RUN mkdir -p /app/remotefs
-ENV HERMES_REMOTE_MOUNTPOINT=/app/remotefs
+ENV HERMES_MOUNT_PATH=/app/remotefs
 
 # Grab binary from build stage.
 COPY --from=build /build/target/release/hermes /app/bin/hermes
