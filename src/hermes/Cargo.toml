@@ -2,6 +2,9 @@
 name = "hermes"
 version = "0.1.0"
 edition = "2021"
+authors = ["Blooym"]
+license = "AGPL-3.0-only"
+repository = "https://github.com/Blooym/Hermes"
 
 [dependencies]
 remote_mount = { path = "../remote_mount", features = ["protocol-full"] }

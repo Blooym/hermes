@@ -7,7 +7,7 @@ use dotenv::dotenv;
 #[clap(
     name = "hermes",
     author = "Blooym",
-    about = "A simple & lightweight file server that automatically handles remote filesystems and serves them over HTTP."
+    about = "A simple & lightweight file server that can automatically handle both local and remote filesystems using a variety of protocols."
 )]
 pub struct ProgramOptions {
     /// The address + port to listen on.

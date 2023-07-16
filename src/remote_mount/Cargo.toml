@@ -3,6 +3,8 @@ name = "remote_mount"
 version = "0.1.0"
 edition = "2021"
 authors = ["Blooym"]
+license = "AGPL-3.0-only"
+repository = "https://github.com/Blooym/Hermes"
 
 [features]
 default = ["protocol-full"]
