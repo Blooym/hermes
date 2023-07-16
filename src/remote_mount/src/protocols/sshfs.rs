@@ -1,11 +1,10 @@
 use async_trait::async_trait;
-use dotenv::dotenv;
 use std::path::Path;
 use tokio::process;
 
 use super::{
-    errors::{MountError, ProtocolError, UnmountError},
-    FromEnv, ProtocolHandler,
+    errors::{MountError, UnmountError},
+    ProtocolHandler,
 };
 
 /// The sshfs binary to use.
@@ -33,6 +32,26 @@ pub struct Sshfs {
 
     /// Additional arguments to pass to sshfs.
     extra_args: String,
+}
+
+impl Sshfs {
+    /// Create a new instance of Sshfs.
+    pub fn new(
+        mountpoint: String,
+        connection_string: String,
+        options: String,
+        password: String,
+        extra_args: String,
+    ) -> Self {
+        Self {
+            mounted: false,
+            mountpoint,
+            connection_string,
+            options,
+            password,
+            extra_args,
+        }
+    }
 }
 
 #[async_trait]
@@ -112,33 +131,5 @@ impl ProtocolHandler<'_> for Sshfs {
             }
             Err(e) => Err(UnmountError::UnmountFailed(e.to_string())),
         }
-    }
-}
-
-const CONNECTION_STRING_ENV_VAR: &str = "HERMES_SSHFS_CONNECTION_STRING";
-const PASSWORD_ENV_VAR: &str = "HERMES_SSHFS_PASSWORD";
-const OPTIONS_ENV_VAR: &str = "HERMES_SSHFS_OPTIONS";
-const EXTRA_ARGS_ENV_VAR: &str = "HERMES_SSHFS_EXTRA_ARGS";
-
-impl FromEnv for Sshfs {
-    fn with_mountpoint_from_env(mountpoint: String) -> Result<Self, ProtocolError> {
-        dotenv().ok();
-
-        let connection_string = std::env::var(CONNECTION_STRING_ENV_VAR).map_err(|_| {
-            ProtocolError::MissingConfigurationOption(CONNECTION_STRING_ENV_VAR.to_string())
-        })?;
-        let password = std::env::var(PASSWORD_ENV_VAR)
-            .map_err(|_| ProtocolError::MissingConfigurationOption(PASSWORD_ENV_VAR.to_string()))?;
-        let options = std::env::var(OPTIONS_ENV_VAR).unwrap_or_default();
-        let extra_args = std::env::var(EXTRA_ARGS_ENV_VAR).unwrap_or_default();
-
-        Ok(Sshfs {
-            mounted: false,
-            mountpoint,
-            connection_string,
-            options,
-            password,
-            extra_args,
-        })
     }
 }

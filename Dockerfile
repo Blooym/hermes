@@ -4,10 +4,10 @@
 FROM rust:1-alpine as build
 WORKDIR /build
 
-# Install essential build tools.
+# Build dependencies.
 RUN apk add --no-cache --update build-base
 
-# Build the binary.
+# Build the project.
 COPY ["Cargo.toml", "Cargo.lock", "./"]
 COPY src/ src/
 RUN cargo build --release --bin hermes
@@ -18,29 +18,27 @@ RUN cargo build --release --bin hermes
 # -----------
 FROM alpine as runtime
 WORKDIR /app
+MAINTAINER "Blooym"
 
-# Install dependencies.
+# Runtime dependencies.
 RUN apk add --no-cache --update sshfs fuse
 
-# Setup and switch to non-root user.
+# Create a user to run the app.
 RUN addgroup -S hermes \
     && adduser -s /bin/false -S -G hermes -H -D hermes -h /app \
     && chown -R hermes:hermes /app
 USER hermes
 
-# Setup socket address.
+# Setup default configuration.
+RUN mkdir -p /app/servefs
+ENV HERMES_SERVE_DIR=/app/servefs
+ENV HERMES_SSHFS_MOUNTPOINT=/app/servefs
 ENV HERMES_SOCKETADDR=0.0.0.0:8080
+ENV RUST_LOG=info
 EXPOSE 8080
 
-# Setup remote mountpoint.
-RUN mkdir -p /app/remotefs
-ENV HERMES_MOUNT_PATH=/app/remotefs
-
-# Set log level
-ENV RUST_LOG=info
-
-# Grab binary from build stage.
+# Copy the binary from the build stage.
 COPY --from=build /build/target/release/hermes /app/bin/hermes
 
-# Run the binary.
+# Run the app
 CMD ["/app/bin/hermes"]
