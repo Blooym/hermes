@@ -1,2 +1,6 @@
 [workspace]
 members = ["src/hermes", "src/remote_mount"]
+
+[profile.release]
+strip = true
+codegen-units = 1
