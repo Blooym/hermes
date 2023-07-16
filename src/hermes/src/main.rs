@@ -99,7 +99,7 @@ fn create_app(serve_directory: &String) -> Router {
     Router::new()
         .nest_service(
             "/",
-            ServeDir::new(&serve_directory)
+            ServeDir::new(serve_directory)
                 .append_index_html_on_directories(true)
                 .fallback(handle_404_file.into_service()),
         )
@@ -113,7 +113,7 @@ fn create_app(serve_directory: &String) -> Router {
 /// Start the app.
 async fn start_app(app: Router, socket_addr: &SocketAddr) {
     info!("Server listening on {}", socket_addr);
-    axum::Server::bind(&socket_addr)
+    axum::Server::bind(socket_addr)
         .serve(app.into_make_service())
         .await
         .unwrap();
