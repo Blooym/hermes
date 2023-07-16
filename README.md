@@ -2,51 +2,59 @@
 [![Code Changes](https://github.com/Blooym/Hermes/actions/workflows/code_changes.yml/badge.svg)](https://github.com/Blooym/Hermes/actions/workflows/code_changes.yml)
 [![Container Changes](https://github.com/Blooym/Hermes/actions/workflows/container_changes.yml/badge.svg)](https://github.com/Blooym/Hermes/actions/workflows/container_changes.yml)
 
-A simple & lightweight file server that automatically handles remote filesystems and serves them over HTTP.
+Named after the Greek god of travel, Hermes is a simple & lightweight file server that can automatically handle both local and remote filesystems using a variety of protocols.
 
-## Usage
+## Features
 
-Docker is the recommended way to run Hermes, however it can also be used as a standalone binary. Please keep in mind that if you choose to use Hermes as a standalone binary, you will need to install the dependencies for the protocol you wish to use.
+### Supported Protocols
 
-It is recommended to place Hermes behind a reverse proxy that can provide a caching layer as remote filesystems can be relatively slow to request from depending on their location relative to the server and the protocol used. You will also need to use a reverse proxy if you wish to use HTTPS as Hermes does not support it natively.
-
-### Docker
-
-A prebuilt Docker image with all protocols enabled can be pulled from the GitHub Container Registry. The latest version is available at
-```
-FROM ghcr.io/blooym/hermes:latest
-```
-
-You can also use a specific version by replacing `latest` with the version you wish to use. A list of available versions can be found [here](https://github.com/Blooym/hermes/pkgs/container/hermes/versions?filters%5Bversion_type%5D=tagged).
-
-This image will automatically set a default mountpoint inside the container and a socket address of `0.0.0.0:8080` which can be overridden by setting the appropriate environment variables. You will need to pass the `--privileged` flag to the container to allow it to mount the remote filesystem.
-
-## Supported Protocols
-
-Hermes currently supports the following protocols, contributions are welcome to support more.
+Hermes currently supports the following protocols, contributions are welcome to add more protocols.
 
 | Protocol | Supported |
 | --- | --- |
+| Local | ✅ |
 | SSHFS | ✅ |
 | Samba | ❌ |
 | NFS | ❌ |
 | FTP | ❌ |
 | WebDAV | ❌ |
 
+## Usage
+
+A container is the recommended way to run Hermes, it can however be used as a standalone semi-crossplatform binary. Please keep in mind that if you choose to use Hermes as an uncontained binary you will need to install the dependencies for the protocol you wish to use and handle things manually.
+
+It is recommended to place Hermes behind a reverse proxy that can provide caching, TLS, and compression as remote filesystems can be relatively slow to request from depending on their location relative to the server and the protocol used.
+
+### Container
+
+A prebuilt container image with support for all protocols can be pulled from the GitHub Container Registry - you can view the available tags [here](https://github.com/Blooym/hermes/pkgs/container/hermes/versions?filters%5Bversion_type%5D=tagged).
+
+This container image will automatically set a few environment variables to ensure it works out of the box. It is recommended you do not override the default variables as it may lead to unexpected behaviour. The following variables are set by the container image:
+
+| Variable | Value | Reason |
+| --- | --- | --- |
+| `HERMES_SOCKET_ADDR` | `0.0.0.0:8080` | To `0.0.0.0` allows the container to be accessed from outside networks. |
+| `HERMES_SERVE_DIR` | `/app/servefs` | It has already been created inside of the container with the correct permissions. |
+| `HERMES_SSHFS_MOUNTPOINT` | `/app/servefs` | To mount to the same directory as the serve directory |
+| `RUST_LOG` | `INFO` | To provide more information about the state of the server |
+
+Please note that the container will require privileged access if you wish to mount remote filesystems, you can grant this by passing the `--privileged` flag to the run command or by setting `privileged: true` in your compose file.
+
 ## Configuration
 
-Hermes is configured primarily through environment variables. although some general configuration can be done through command line arguments. The following sections will detail the available configuration options.
+Hermes is configured primarily through environment variables, although some general configuration can be done through command line arguments. The following sections will detail the available configuration options.
 
 ### General
 
 The following variables are used regardless of the protocol selected.
 
-| Variable | Description | Flag | Default | Required |
+| Variable | Flag | Description  | Default | Required |
 | --- | --- | --- | --- | --- |
-| `HERMES_SOCKET_ADDR` | The address to bind the HTTP server to. | `--socket-addr` | `0.0.0.0:8080` | No |
-| `HERMES_MOUNT_PATH` | The path to mount the remote filesystem to. | `--mountpoint` | N/A | Yes |
-| `HERMES_PROTOCOL` | The protocol to use for the remote filesystem. | `--protocol` | N/A | Yes |
-| `RUST_LOG` | The log level to use for messages. | N/A | `ERROR` | No |
+| `HERMES_SOCKET_ADDR` | `--socket-addr` | The address to bind the HTTP server to. | `0.0.0.0:8080` | YES |
+| `HERMES_SERVE_DIR` | `--serve-dir` | The directory to serve files from. | N/A | YES |
+| `HERMES_PROTOCOL` | `--protocol` | The protocol to use for the remote filesystem. | N/A | YES |
+| `RUST_LOG` | N/A | The log level to use for tracing. | N/A | NO |
+| `RUST_BACKTRACE` | N/A | Whether to enable backtraces for errors. | N/A | NO |
 
 ### SSHFS
 
@@ -54,7 +62,8 @@ The following variables are used when the SSHFS protocol is selected.
 
 | Variable | Description | Required |
 | --- | --- | --- |
-| `HERMES_SSHFS_CONNECTION_STRING` | The connection string to use for SSHFS. | Yes |
-| `HERMES_SSHFS_PASSWORD` | The password to use for SSHFS. | Yes |
-| `HERMES_SSHFS_OPTIONS` | Additional options to pass to SSHFS. | No |
-| `HERMES_SSHFS_ARGS` | Additional arguments to pass to SSHFS. | No |
+| `HERMES_SSHFS_CONNECTION_STRING` | The connection string to use for SSHFS. | YES |
+| `HERMES_SSHFS_MOUNTPOINT` | The mountpoint to use for SSHFS. | YES |
+| `HERMES_SSHFS_PASSWORD` | The password to use for SSHFS. | YES |
+| `HERMES_SSHFS_OPTIONS` | Additional options to pass to SSHFS. | NO |
+| `HERMES_SSHFS_ARGS` | Additional arguments to pass to SSHFS. | NO |

@@ -1,4 +1,3 @@
-use self::errors::ProtocolError;
 use async_trait::async_trait;
 use std::str::FromStr;
 
@@ -34,12 +33,4 @@ pub trait ProtocolHandler<'r> {
 
     /// Returns true if the remote filesystem is mounted.
     fn is_mounted(&self) -> bool;
-}
-
-/// A trait for creating a new instance of a protocol handler from environment variables and a specified mountpoint.
-pub trait FromEnv {
-    /// Create a new instance from environment variables.
-    fn with_mountpoint_from_env(mountpoint: String) -> Result<Self, ProtocolError>
-    where
-        Self: Sized;
 }
