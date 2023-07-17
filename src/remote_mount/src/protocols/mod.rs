@@ -1,9 +1,9 @@
-use async_trait::async_trait;
-use std::str::FromStr;
-
 pub mod errors;
 #[cfg(feature = "protocol-sshfs")]
 pub mod sshfs;
+
+use async_trait::async_trait;
+use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Protocols {

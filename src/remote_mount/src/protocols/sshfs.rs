@@ -1,11 +1,10 @@
-use async_trait::async_trait;
-use std::path::Path;
-use tokio::process;
-
 use super::{
     errors::{MountError, UnmountError},
     ProtocolHandler,
 };
+use async_trait::async_trait;
+use std::path::Path;
+use tokio::process;
 
 /// The sshfs binary to use.
 const SSHFS_BIN: &str = "sshfs";
