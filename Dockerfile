@@ -18,27 +18,25 @@ RUN cargo build --release --bin hermes
 # -----------
 FROM alpine as runtime
 WORKDIR /app
-MAINTAINER "Blooym"
 
 # Runtime dependencies.
 RUN apk add --no-cache --update sshfs fuse
 
 # Create a user to run the app.
 RUN addgroup -S hermes \
-    && adduser -s /bin/false -S -G hermes -H -D hermes -h /app \
-    && chown -R hermes:hermes /app
-USER hermes
+    && adduser -s /bin/false -S -G hermes -H -D hermes
 
-# Setup default configuration.
-RUN mkdir -p /app/servefs
+# Setup the default configuration for the container.
+RUN mkdir -p /app/servefs && chown -R hermes:hermes /app/servefs
 ENV HERMES_SERVE_DIR=/app/servefs
 ENV HERMES_SSHFS_MOUNTPOINT=/app/servefs
 ENV HERMES_SOCKETADDR=0.0.0.0:8080
-ENV RUST_LOG=info
 EXPOSE 8080
+ENV RUST_LOG=info
 
 # Copy the binary from the build stage.
 COPY --from=build /build/target/release/hermes /app/bin/hermes
 
-# Run the app
+# Run the app as a non-root user.
+USER hermes
 CMD ["/app/bin/hermes"]
