@@ -384,7 +384,7 @@ checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
 
 [[package]]
 name = "hermes"
-version = "0.1.0"
+version = "0.3.0"
 dependencies = [
  "axum",
  "clap",
@@ -751,7 +751,7 @@ checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 
 [[package]]
 name = "remote_mount"
-version = "0.1.0"
+version = "0.3.0"
 dependencies = [
  "async-trait",
  "tokio",
