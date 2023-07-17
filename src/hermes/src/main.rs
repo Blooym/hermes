@@ -1,14 +1,15 @@
 #![forbid(unsafe_code)]
 
+mod env;
 mod program_options;
-mod remote_settings;
+mod protocols;
 
 use crate::program_options::{ProgramOptions, Protocols};
-use crate::remote_settings::{FromEnv, SshfsOptions};
+use crate::protocols::get_protocol_handler;
 use axum::{handler::HandlerWithoutStateExt, http::StatusCode, Router};
 use dotenv::dotenv;
 use futures::stream::StreamExt;
-use remote_mount::protocols::{sshfs::Sshfs, ProtocolHandler};
+use remote_mount::protocols::ProtocolHandler;
 use signal_hook::consts::signal::*;
 use signal_hook_tokio::Signals;
 use std::net::SocketAddr;
@@ -22,76 +23,77 @@ use tracing::{error, info, Level};
 async fn main() {
     dotenv().ok();
     tracing_subscriber::fmt::init();
+
     let program_options: ProgramOptions = ProgramOptions::from_env_and_args();
 
-    // If we're using a local filesystem, set it up and start the server without a protocol handler.
+    // If we're using a local filesystem, set it up and start the server without using a protocol.
     if program_options.protocol == Protocols::Local {
-        info!("Using local filesystem");
+        info!(
+            "Serving files from local filesystem at {}",
+            &program_options.serve_dir
+        );
+
+        // Create the app.
         let app = create_app(&program_options.serve_dir);
 
-        info!("Serving files from {}", &program_options.serve_dir);
-        start_app(app, &program_options.socket_addr).await;
-        return;
-    }
+        // Setup signal handling for exiting on a signal.
+        let signals: signal_hook_tokio::SignalsInfo =
+            Signals::new([SIGHUP, SIGTERM, SIGINT, SIGQUIT]).expect("Failed to register signals");
+        let handle = signals.handle();
+        let signals_task = tokio::spawn(handle_exit_on_signal(signals));
 
-    // Otherwise, we're using a remote filesystem, so set up the protocol handler.
-    info!("Using protocol '{:#?}'", program_options.protocol);
-    let mut protocol_handler: Box<dyn ProtocolHandler + Send + Sync> =
-        match program_options.protocol {
-            Protocols::Sshfs => {
-                let sshfs_options = match SshfsOptions::from_env() {
-                    Ok(options) => options,
-                    Err(e) => {
-                        error!("Failed to get SSHFS options from environment: {:#?}", e);
-                        exit(1);
-                    }
-                };
-                let handler = Sshfs::new(
-                    sshfs_options.mountpoint,
-                    sshfs_options.connection_string,
-                    sshfs_options.options,
-                    sshfs_options.password,
-                    sshfs_options.extra_args,
-                );
-                Box::new(handler)
-            }
-            _ => {
+        // Start the server.
+        start_app(app, &program_options.socket_addr).await;
+
+        // Unregister signal handlers.
+        handle.close();
+        signals_task.await.unwrap();
+    } else {
+        // Otherwise, we're using a remote filesystem, so set up the protocol handler.
+        info!("Using protocol '{:#?}'", program_options.protocol);
+
+        // Get the protocol handler.
+        let mut protocol_handler = get_protocol_handler(&program_options.protocol);
+        match protocol_handler.all_deps_present() {
+            Ok(_) => {}
+            Err(missing_deps) => {
                 error!(
-                    "Protocol {:#?} is not supported as a remote filesystem",
-                    program_options.protocol
+                    "Unable to use protocol, the following dependencies are missing or not in $PATH: {:#?}",
+                    missing_deps
                 );
                 exit(1);
             }
-        };
+        }
 
-    // Mount the remote filesystem using the protocol handler if necessary.
-    match protocol_handler.mount().await {
-        Ok(_) => {
-            info!(
-                "Successfully mounted filesystem at {}",
-                &program_options.serve_dir
-            );
+        // Mount the remote filesystem using the protocol handler if necessary.
+        match protocol_handler.mount().await {
+            Ok(_) => {
+                info!(
+                    "Successfully mounted filesystem at {}",
+                    &program_options.serve_dir
+                );
+            }
+            Err(e) => {
+                error!("Failed to mount filesystem: {:#?}", e);
+                exit(1);
+            }
         }
-        Err(e) => {
-            error!("Failed to mount filesystem: {:#?}", e);
-            exit(1);
-        }
+
+        // Setup signal handling for unmounting the remote filesystem when exiting.
+        let signals: signal_hook_tokio::SignalsInfo =
+            Signals::new([SIGHUP, SIGTERM, SIGINT, SIGQUIT]).expect("Failed to register signals");
+        let handle = signals.handle();
+        let signals_task = tokio::spawn(handle_unmount_on_signal(signals, protocol_handler));
+
+        // Create the app and start it.
+        let app = create_app(&program_options.serve_dir);
+        info!("Serving files from {}", &program_options.serve_dir);
+        start_app(app, &program_options.socket_addr).await;
+
+        // Unregister signal handlers.
+        handle.close();
+        signals_task.await.unwrap();
     }
-
-    // Setup signal handling for unmounting the remote filesystem when exiting.
-    let signals: signal_hook_tokio::SignalsInfo =
-        Signals::new([SIGHUP, SIGTERM, SIGINT, SIGQUIT]).expect("Failed to register signals");
-    let handle = signals.handle();
-    let signals_task = tokio::spawn(handle_unmount_on_signal(signals, protocol_handler));
-
-    // Create the app and start it.
-    let app = create_app(&program_options.serve_dir);
-    info!("Serving files from {}", &program_options.serve_dir);
-    start_app(app, &program_options.socket_addr).await;
-
-    // Unregister signal handlers.
-    handle.close();
-    signals_task.await.unwrap();
 }
 
 /// Create the app.
@@ -125,6 +127,16 @@ async fn handle_404_file() -> (StatusCode, &'static str) {
         StatusCode::NOT_FOUND,
         "The requested resource could not be found.",
     )
+}
+
+/// Handles exiting on a signal.
+async fn handle_exit_on_signal(mut signals: Signals) {
+    while let Some(signal) = signals.next().await {
+        match signal {
+            SIGTERM | SIGINT | SIGQUIT | SIGHUP => exit(0),
+            _ => unreachable!(),
+        }
+    }
 }
 
 /// Handles unmounting the remote filesystem on a signal.
