@@ -14,6 +14,7 @@ Hermes currently supports the following protocols, contributions are welcome to 
 | --- | --- |
 | Local | ✅ |
 | SSHFS | ✅ |
+| S3FS | ❌ |
 | Samba | ❌ |
 | NFS | ❌ |
 | FTP | ❌ |
@@ -21,7 +22,7 @@ Hermes currently supports the following protocols, contributions are welcome to 
 
 ## Usage
 
-A container is the recommended way to run Hermes, it can however be used as a standalone semi-crossplatform binary. Please keep in mind that if you choose to use Hermes as an uncontained binary you will need to install the dependencies for the protocol you wish to use and handle things manually.
+A container is the recommended way to run Hermes, it can however be used as a standalone binary although it must be manually compiled and no support is offered for Windows (not including WSL). Please keep in mind that if you choose to use Hermes as an uncontained binary you will need to install the dependencies for the protocol you wish to use and handle things manually.
 
 It is recommended to place Hermes behind a reverse proxy that can provide caching, TLS, and compression as remote filesystems can be relatively slow to request from depending on their location relative to the server and the protocol used.
 
