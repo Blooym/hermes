@@ -25,12 +25,16 @@ impl FromStr for Protocols {
 /// A trait for handling a filesystem protocol / mounting filesystems.
 #[async_trait]
 pub trait ProtocolHandler<'r> {
-    /// Mount the filesystem.
+    /// Mount the remote filesystem.
     async fn mount(&mut self) -> Result<String, errors::MountError>;
 
-    /// Unmount the filesystem.
+    /// Unmount the remote filesystem.
     async fn unmount(&mut self) -> Result<String, errors::UnmountError>;
 
-    /// Returns true if the remote filesystem is mounted.
+    /// Check to see if the remote filesystem is mounted.
     fn is_mounted(&self) -> bool;
+
+    /// Check to see if the required dependencies for this protocol are installed.
+    /// Returns an error with a vector of missing dependencies if any are missing.
+    fn all_deps_present(&self) -> Result<(), Vec<String>>;
 }
