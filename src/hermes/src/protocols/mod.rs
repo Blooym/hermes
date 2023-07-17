@@ -1,10 +1,10 @@
+pub mod sshfs;
+
 use self::sshfs::SshfsOptions;
 use crate::{env::FromEnv, program_options::Protocols};
 use remote_mount::protocols::ProtocolHandler;
 use std::process::exit;
 use tracing::error;
-
-pub mod sshfs;
 
 /// Get the protocol handler for the given protocol.
 pub fn get_protocol_handler<'r>(

@@ -1,7 +1,6 @@
-use std::{net::SocketAddr, str::FromStr};
-
 use clap::Parser;
 use dotenv::dotenv;
+use std::{net::SocketAddr, str::FromStr};
 
 #[derive(Parser, Debug)]
 #[clap(
