@@ -1,5 +1,5 @@
 [workspace]
-members = ["src/hermes", "src/remote_mount"]
+members = ["src/hermes", "src/remote-mount"]
 
 [profile.release]
 strip = true

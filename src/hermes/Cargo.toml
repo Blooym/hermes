@@ -7,7 +7,7 @@ license = "AGPL-3.0-only"
 repository = "https://github.com/Blooym/Hermes"
 
 [dependencies]
-remote_mount = { path = "../remote_mount", features = ["protocol-full"] }
+remote-mount = { path = "../remote-mount", features = ["protocols-full"] }
 clap = { version = "4.3.0", features = ["derive", "env"] }
 axum = { version = "0.6.18" }
 dotenv = "0.15.0"

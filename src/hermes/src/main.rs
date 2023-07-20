@@ -38,7 +38,7 @@ async fn main() {
 
         // Setup signal handling for exiting on a signal.
         let signals: signal_hook_tokio::SignalsInfo =
-            Signals::new([SIGHUP, SIGTERM, SIGINT, SIGQUIT]).expect("Failed to register signals");
+            Signals::new([SIGTERM, SIGINT, SIGQUIT]).expect("Failed to register signals");
         let handle = signals.handle();
         let signals_task = tokio::spawn(handle_exit_on_signal(signals));
 
@@ -54,15 +54,15 @@ async fn main() {
 
         // Get the protocol handler.
         let mut protocol_handler = get_protocol_handler(&program_options.protocol);
-        match protocol_handler.all_deps_present() {
-            Ok(_) => {}
-            Err(missing_deps) => {
+        match protocol_handler.missing_dependencies() {
+            Some(missing_deps) => {
                 error!(
                     "Unable to use protocol, the following dependencies are missing or not in $PATH: {:#?}",
                     missing_deps
                 );
                 exit(1);
             }
+            None => {}
         }
 
         // Mount the remote filesystem using the protocol handler if necessary.
@@ -146,7 +146,7 @@ async fn handle_unmount_on_signal(
 ) {
     while let Some(signal) = signals.next().await {
         match signal {
-            SIGTERM | SIGINT | SIGQUIT | SIGHUP => match mount_handler.unmount().await {
+            SIGTERM | SIGINT | SIGQUIT => match mount_handler.unmount().await {
                 Ok(_) => {
                     info!("Successfully unmounted filesystem");
                     exit(0)

@@ -1,6 +1,6 @@
 pub mod sshfs;
-
 use self::sshfs::SshfsOptions;
+
 use crate::{env::FromEnv, program_options::Protocols};
 use remote_mount::protocols::ProtocolHandler;
 use std::process::exit;
@@ -27,5 +27,6 @@ pub fn get_protocol_handler<'r>(
             exit(1);
         }
     };
+
     Box::new(handler)
 }
