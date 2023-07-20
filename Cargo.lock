@@ -390,7 +390,7 @@ dependencies = [
  "clap",
  "dotenv",
  "futures",
- "remote_mount",
+ "remote-mount",
  "signal-hook",
  "signal-hook-tokio",
  "tokio",
@@ -750,7 +750,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5ea92a5b6195c6ef2a0295ea818b312502c6fc94dde986c5553242e18fd4ce2"
 
 [[package]]
-name = "remote_mount"
+name = "remote-mount"
 version = "0.3.0"
 dependencies = [
  "async-trait",
