@@ -54,15 +54,12 @@ async fn main() {
 
         // Get the protocol handler.
         let mut protocol_handler = get_protocol_handler(&program_options.protocol);
-        match protocol_handler.missing_dependencies() {
-            Some(missing_deps) => {
-                error!(
-                    "Unable to use protocol, the following dependencies are missing or not in $PATH: {:#?}",
-                    missing_deps
-                );
-                exit(1);
-            }
-            None => {}
+        if let Some(missing_deps) = protocol_handler.missing_dependencies() {
+            error!(
+                "Unable to use protocol, the following dependencies are missing or not in $PATH: {:#?}",
+                missing_deps
+            );
+            exit(1);
         }
 
         // Mount the remote filesystem using the protocol handler if necessary.

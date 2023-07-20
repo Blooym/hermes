@@ -63,11 +63,8 @@ impl Sshfs {
 #[async_trait]
 impl ProtocolHandler<'_> for Sshfs {
     async fn mount(&'_ mut self) -> Result<String, MountError> {
-        match self.missing_dependencies() {
-            Some(missing_deps) => {
-                return Err(MountError::MissingDependencies(missing_deps.join(", ")));
-            }
-            None => {}
+        if let Some(missing_deps) = self.missing_dependencies() {
+            return Err(MountError::MissingDependencies(missing_deps.join(", ")));
         }
 
         // Make sure we aren't already mounted.
@@ -132,12 +129,8 @@ impl ProtocolHandler<'_> for Sshfs {
     }
 
     async fn unmount(&mut self) -> Result<String, UnmountError> {
-        // Ensure we aren't missing any dependencies.
-        match self.missing_dependencies() {
-            Some(missing_deps) => {
-                return Err(UnmountError::MissingDependencies(missing_deps.join(", ")));
-            }
-            None => {}
+        if let Some(missing_deps) = self.missing_dependencies() {
+            return Err(UnmountError::MissingDependencies(missing_deps.join(", ")));
         }
 
         // Ensure we're mounted.
