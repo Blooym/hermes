@@ -1,4 +1,4 @@
-FROM rust:1
+FROM rust:1-bookworm
 
 # Install dependencies
 RUN apt-get update && apt-get install -y sshfs fuse3

@@ -9,14 +9,14 @@ RUN apk add --no-cache --update build-base
 
 # Build the project.
 COPY ["Cargo.toml", "Cargo.lock", "./"]
-COPY src/ src/
+COPY crates/ crates/
 RUN cargo build --release --bin hermes
 
 
 # -----------
 #   RUNTIME  
 # -----------
-FROM alpine as runtime
+FROM alpine
 WORKDIR /app
 
 # Runtime dependencies.
