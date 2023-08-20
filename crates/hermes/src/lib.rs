@@ -20,7 +20,7 @@ pub fn create_app(app_options: AppOptions) -> Router {
     Router::new()
         .nest_service(
             "/",
-            ServeDir::new(&app_options.serve_directory)
+            ServeDir::new(app_options.serve_directory)
                 .append_index_html_on_directories(true)
                 .not_found_service(handle_404_file.into_service()),
         )
