@@ -1,5 +1,6 @@
 [workspace]
 members = ["crates/hermes", "crates/remote-mount"]
+resolver = "2"
 
 [profile.release]
 strip = true

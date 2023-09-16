@@ -22,7 +22,7 @@ features = ["full"]
 optional = true
 
 [dependencies.which]
-version = "4.4.0"
+version = "4.4.2"
 optional = true
 
 [dependencies.log]
