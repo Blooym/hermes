@@ -14,11 +14,6 @@ Hermes currently supports the following protocols, contributions are welcome to 
 | --- | --- |
 | Local | ✅ |
 | SSHFS | ✅ |
-| S3FS | ❌ |
-| Samba | ❌ |
-| NFS | ❌ |
-| FTP | ❌ |
-| WebDAV | ❌ |
 
 ## Usage
 
