@@ -44,17 +44,14 @@ impl Sshfs {
 
     async fn execute_command(&self, shell: &str, command: &str) -> Result<Output> {
         info!(
-            "Executing command: {}",
+            "Executing command: {} -c {}",
+            shell,
             command.replace(&self.password, "**********")
         );
 
-        let shell_location = which::which(shell)
-            .context("Unable to find shell binary in path")?
-            .canonicalize()?;
+        let cmd = format!("{} -c '{}'", shell, command);
 
-        let cmd = format!("{} -c '{}'", shell_location.display(), command);
-
-        let proc = Command::new(SHELL_BIN)
+        let proc = Command::new(shell)
             .args(["-c", &cmd])
             .output()
             .await
@@ -81,10 +78,6 @@ impl ProtocolHandler<'_> for Sshfs {
             anyhow::bail!(MountError::AlreadyMounted);
         }
 
-        let sshfs_location = which::which(SSHFS_BIN)
-            .context("Unable to find sshfs binary in path")?
-            .canonicalize()?;
-
         let options_str = if self.options.is_empty() {
             String::new()
         } else {
@@ -94,7 +87,7 @@ impl ProtocolHandler<'_> for Sshfs {
         let cmd = format!(
             "echo '{}' | {} {} {} {} {}",
             self.password,
-            sshfs_location.display(),
+            SSHFS_BIN,
             self.connection_string,
             self.mountpoint,
             options_str,
@@ -127,15 +120,8 @@ impl ProtocolHandler<'_> for Sshfs {
             anyhow::bail!(UnmountError::NotMounted);
         }
 
-        let umount_location = which::which(UMOUNT_BIN)
-            .context(UnmountError::MissingDependency(UMOUNT_BIN.to_string()))?
-            .canonicalize()?;
-
         let proc = self
-            .execute_command(
-                SHELL_BIN,
-                &format!("{} -u {}", umount_location.display(), self.mountpoint),
-            )
+            .execute_command(SHELL_BIN, &format!("{} -u {}", UMOUNT_BIN, self.mountpoint))
             .await?;
 
         let stderr = String::from_utf8_lossy(&proc.stderr);
