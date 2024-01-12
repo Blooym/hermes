@@ -153,10 +153,8 @@ async fn serve_remote(program_options: ProgramOptions, app_options: AppOptions) 
 
 async fn start_app(app: Router, socket_addr: &SocketAddr) {
     info!("Server listening on {}", socket_addr);
-    axum::Server::bind(socket_addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind(socket_addr).await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
 
 async fn handle_exit_on_signal(mut signals: Signals) {
