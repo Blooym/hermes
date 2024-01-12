@@ -158,7 +158,7 @@ async fn start_app(app: Router, socket_addr: &SocketAddr) {
 }
 
 async fn handle_exit_on_signal(mut signals: Signals) {
-    while let Some(signal) = signals.next().await {
+    if let Some(signal) = signals.next().await {
         match signal {
             SIGTERM | SIGINT | SIGQUIT | SIGHUP => exit(0),
             _ => unreachable!(),
@@ -170,7 +170,7 @@ async fn handle_unmount_on_signal(
     mut signals: Signals,
     mut mount_handler: Box<dyn ProtocolHandler<'_> + Send + Sync>,
 ) {
-    while let Some(signal) = signals.next().await {
+    if let Some(signal) = signals.next().await {
         match signal {
             SIGTERM | SIGINT | SIGQUIT => match mount_handler.unmount().await {
                 Ok(_) => {
