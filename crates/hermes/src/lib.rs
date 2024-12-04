@@ -3,6 +3,8 @@
 pub mod protocols;
 pub mod traits;
 
+use std::path::PathBuf;
+
 use axum::handler::HandlerWithoutStateExt;
 use axum::Router;
 use tower_http::services::ServeDir;
@@ -12,7 +14,7 @@ use tracing::Level;
 
 /// Options for the app.
 pub struct AppOptions {
-    pub serve_directory: String,
+    pub serve_directory: PathBuf,
 }
 
 /// Create a new app instance with the given options.
