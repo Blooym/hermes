@@ -1,8 +1,11 @@
 # Hermes
-[![Code Changes](https://github.com/Blooym/Hermes/actions/workflows/code_changes.yml/badge.svg)](https://github.com/Blooym/Hermes/actions/workflows/code_changes.yml)
-[![Container Changes](https://github.com/Blooym/Hermes/actions/workflows/container_changes.yml/badge.svg)](https://github.com/Blooym/Hermes/actions/workflows/container_changes.yml)
 
 Named after the Greek god of travel, Hermes is a simple & lightweight file server that can automatically handle both local and remote filesystems using a variety of protocols.
+
+> [!CAUTION]  
+> **This project is made for me and my needs and no support will be offered to anyone trying to use it.** 
+>
+> Breaking changes CAN and WILL be made at any time; the purpose of the software may also change.
 
 ## Features
 
