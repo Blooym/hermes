@@ -2,7 +2,7 @@
 
 use axum::Router;
 use clap::Parser;
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use futures::stream::StreamExt;
 use hermes::protocols::get_protocol_handler;
 use hermes::{create_app, AppOptions};

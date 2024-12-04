@@ -10,20 +10,9 @@ repository = "https://github.com/Blooym/Hermes"
 default = []
 protocols-sshfs = ["which", "tokio"]
 
-[dependencies.anyhow]
-version = "1.0.79"
-
-[dependencies.async-trait]
-version = "0.1.77"
-
-[dependencies.tokio]
-version = "1.35.1"
-features = ["full"]
-optional = true
-
-[dependencies.which]
-version = "5.0.0"
-optional = true
-
-[dependencies.log]
-version = "0.4.20"
+[dependencies]
+anyhow = "1.0.94"
+tokio = { version = "1.42.0", features = ["full"], optional = true }
+which = { version = "7.0.0", optional = true }
+log = "0.4.22"
+async-trait = "0.1.83"
