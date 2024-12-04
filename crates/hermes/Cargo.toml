@@ -13,7 +13,7 @@ path = "src/lib.rs"
 name = "hermes"
 path = "src/bin/hermes.rs"
 
-[lints.clippy]
+[rustc.clippy]
 unsafe_code = "forbid"
 
 [features]
