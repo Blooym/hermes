@@ -1,5 +1,4 @@
-#![forbid(unsafe_code)]
-
+use anyhow::Result;
 use axum::Router;
 use clap::Parser;
 use dotenvy::dotenv;
@@ -10,6 +9,7 @@ use remote_mount::protocols::ProtocolHandler;
 use signal_hook::consts::signal::*;
 use signal_hook_tokio::Signals;
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::process::exit;
 use std::str::FromStr;
 use tracing::{error, info};
@@ -67,7 +67,7 @@ struct ProgramOptions {
 
     /// The directory to serve files from.
     #[clap(short = 'd', long = "serve-dir", env = "HERMES_SERVE_DIR")]
-    pub serve_dir: String,
+    pub serve_dir: PathBuf,
 }
 
 impl ProgramOptions {
@@ -79,7 +79,7 @@ impl ProgramOptions {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
     dotenv().ok();
     tracing_subscriber::fmt::init();
 
@@ -89,16 +89,18 @@ async fn main() {
     };
 
     if program_options.protocol == Protocol::Local {
-        serve_local(program_options, app_options).await;
+        serve_local(program_options, app_options).await?;
     } else {
-        serve_remote(program_options, app_options).await;
+        serve_remote(program_options, app_options).await?;
     }
+
+    Ok(())
 }
 
-async fn serve_local(program_options: ProgramOptions, app_options: AppOptions) {
+async fn serve_local(program_options: ProgramOptions, app_options: AppOptions) -> Result<()> {
     info!(
-        "Serving files from local filesystem at {}",
-        &program_options.serve_dir
+        "Serving files from local filesystem at {:?}",
+        program_options.serve_dir
     );
 
     let app = create_app(app_options);
@@ -106,13 +108,15 @@ async fn serve_local(program_options: ProgramOptions, app_options: AppOptions) {
     let handle = signals.handle();
     let signals_task = tokio::spawn(handle_exit_on_signal(signals));
 
-    start_app(app, &program_options.socket_addr).await;
+    start_app(app, &program_options.socket_addr).await?;
 
     handle.close();
-    signals_task.await.unwrap();
+    signals_task.await?;
+
+    Ok(())
 }
 
-async fn serve_remote(program_options: ProgramOptions, app_options: AppOptions) {
+async fn serve_remote(program_options: ProgramOptions, app_options: AppOptions) -> Result<()> {
     info!("Using protocol '{:#?}'", program_options.protocol);
 
     let mut protocol_handler =
@@ -128,8 +132,8 @@ async fn serve_remote(program_options: ProgramOptions, app_options: AppOptions) 
     match protocol_handler.mount().await {
         Ok(_) => {
             info!(
-                "Successfully mounted filesystem at {}",
-                &program_options.serve_dir
+                "Successfully mounted filesystem at {:?}",
+                program_options.serve_dir
             );
         }
         Err(e) => {
@@ -144,17 +148,19 @@ async fn serve_remote(program_options: ProgramOptions, app_options: AppOptions) 
     let signals_task = tokio::spawn(handle_unmount_on_signal(signals, protocol_handler));
 
     let app = create_app(app_options);
-    info!("Serving files from {}", &program_options.serve_dir);
-    start_app(app, &program_options.socket_addr).await;
+    info!("Serving files from {:?}", program_options.serve_dir);
+    start_app(app, &program_options.socket_addr).await?;
 
     handle.close();
-    signals_task.await.unwrap();
+    signals_task.await?;
+    Ok(())
 }
 
-async fn start_app(app: Router, socket_addr: &SocketAddr) {
+async fn start_app(app: Router, socket_addr: &SocketAddr) -> Result<()> {
     info!("Server listening on {}", socket_addr);
-    let listener = tokio::net::TcpListener::bind(socket_addr).await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(socket_addr).await?;
+    axum::serve(listener, app).await?;
+    Ok(())
 }
 
 async fn handle_exit_on_signal(mut signals: Signals) {

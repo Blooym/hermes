@@ -1,6 +1,6 @@
 [package]
 name = "hermes"
-version = "0.4.2"
+version = "0.4.3"
 edition = "2021"
 authors = ["Blooym"]
 license = "AGPL-3.0-only"
@@ -12,6 +12,9 @@ path = "src/lib.rs"
 [[bin]]
 name = "hermes"
 path = "src/bin/hermes.rs"
+
+[lints.clippy]
+unsafe_code = "forbid"
 
 [features]
 default = ["protocols-sshfs"]
@@ -29,3 +32,4 @@ signal-hook = "0.3.17"
 futures = "0.3.31"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+anyhow = "1.0.94"
