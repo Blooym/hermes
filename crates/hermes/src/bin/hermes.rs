@@ -4,7 +4,7 @@ use clap::Parser;
 use dotenvy::dotenv;
 use futures::stream::StreamExt;
 use hermes::protocols::get_protocol_handler;
-use hermes::{create_app, AppOptions};
+use hermes::{AppOptions, create_app};
 use remote_mount::protocols::ProtocolHandler;
 use signal_hook::consts::signal::*;
 use signal_hook_tokio::Signals;

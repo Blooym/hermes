@@ -5,8 +5,8 @@ pub mod traits;
 
 use std::path::PathBuf;
 
-use axum::handler::HandlerWithoutStateExt;
 use axum::Router;
+use axum::handler::HandlerWithoutStateExt;
 use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
 use tower_http::trace::{self};

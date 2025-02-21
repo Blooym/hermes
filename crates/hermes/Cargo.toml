@@ -21,7 +21,7 @@ default = ["protocols-sshfs"]
 protocols-sshfs = ["remote-mount/protocols-sshfs"]
 
 [dependencies]
-clap = { version = "4.5.22", features = ["derive", "env"] }
+clap = { version = "4.5.30", features = ["derive", "env"] }
 remote-mount = { path = "../remote-mount", features = ["protocols-sshfs"] }
 axum = { version = "0.8.1" }
 dotenvy = "0.15.7"
