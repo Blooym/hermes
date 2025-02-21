@@ -1,6 +1,6 @@
 use super::{
-    errors::{MountError, UnmountError},
     Protocol, ProtocolHandler,
+    errors::{MountError, UnmountError},
 };
 use anyhow::{Context, Result};
 use async_trait::async_trait;
