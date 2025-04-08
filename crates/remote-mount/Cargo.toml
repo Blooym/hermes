@@ -12,7 +12,7 @@ protocols-sshfs = ["which", "tokio"]
 
 [dependencies]
 anyhow = "1.0.96"
-tokio = { version = "1.43.0", features = ["full"], optional = true }
+tokio = { version = "1.43.1", features = ["full"], optional = true }
 which = { version = "7.0.2", optional = true }
 log = "0.4.26"
 async-trait = "0.1.86"
