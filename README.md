@@ -37,7 +37,7 @@ This container image will automatically set a few environment variables to ensur
 | `HERMES_SSHFS_MOUNTPOINT` | `/app/servefs` | To mount to the same directory as the serve directory |
 | `RUST_LOG` | `INFO` | To provide more information about the state of the server |
 
-Please note that the container will require privileged access if you wish to mount remote filesystems, you can grant this by passing the `--privileged` flag to the run command or by setting `privileged: true` in your compose file.
+Please note that the container will require `CAP_SYS_ADMIN` and access to `/dev/fuse` if you wish to mount remote filesystems, you can grant this by passing the `--device=/dev/fuse --cap-add=SYS_ADMIN` flags to the run command or equivilant values in your compose file.
 
 ## Configuration
 
