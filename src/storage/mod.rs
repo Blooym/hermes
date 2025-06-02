@@ -19,7 +19,7 @@ pub enum StorageBackend {
     #[cfg(feature = "storage-s3")]
     S3(Arc<backends::S3Storage>),
     #[cfg(feature = "storage-sshfs")]
-    SSHFS(Arc<backends::SSHFSStorage>),
+    Sshfs(Arc<backends::SSHFSStorage>),
 }
 
 impl StorageOperations for StorageBackend {
@@ -30,7 +30,7 @@ impl StorageOperations for StorageBackend {
             #[cfg(feature = "storage-s3")]
             StorageBackend::S3(storage) => storage.read(path).await,
             #[cfg(feature = "storage-sshfs")]
-            StorageBackend::SSHFS(storage) => storage.read(path).await,
+            StorageBackend::Sshfs(storage) => storage.read(path).await,
         }
     }
 
@@ -41,7 +41,7 @@ impl StorageOperations for StorageBackend {
             #[cfg(feature = "storage-s3")]
             StorageBackend::S3(storage) => storage.exists(path).await,
             #[cfg(feature = "storage-sshfs")]
-            StorageBackend::SSHFS(storage) => storage.exists(path).await,
+            StorageBackend::Sshfs(storage) => storage.exists(path).await,
         }
     }
 }
@@ -89,7 +89,7 @@ impl FromStr for StorageBackend {
                 if mountpoint.is_empty() {
                     return Err("SSHFS mountpoint cannot be empty".to_string());
                 }
-                Ok(Self::SSHFS(Arc::new(
+                Ok(Self::Sshfs(Arc::new(
                     backends::SSHFSStorage::new(mountpoint)
                         .map_err(|err| format!("Failed to create SSHFS storage: {err:?}"))?,
                 )))
