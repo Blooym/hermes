@@ -69,7 +69,7 @@ async fn main() -> Result<()> {
         .route("/{*path}", get(get_file_handler))
         .layer(
             TraceLayer::new_for_http()
-                .make_span_with(DefaultMakeSpan::default())
+                .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
                 .on_request(DefaultOnRequest::default())
                 .on_response(DefaultOnResponse::default().level(Level::INFO))
                 .on_failure(DefaultOnFailure::default()),
