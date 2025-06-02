@@ -27,7 +27,7 @@ RUN apk add --no-cache --update sshfs fuse
 
 # Create a user to run the app.
 RUN addgroup -S hermes \
-    && adduser -s /bin/false -S -G hermes -H -D hermes
+    && adduser -s /bin/false -S -G hermes -D hermes
 
 # Setup the default configuration for the container.
 RUN mkdir -p /srv/hermes && chown -R hermes:hermes /srv/hermes
