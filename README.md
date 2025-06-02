@@ -27,12 +27,12 @@ A premade Dockerfile support for all protocols is available [here](./Dockerfile)
 
 Hermes is configured via command-line flags or environment variables and has full support for loading from `.env` files. Below is a list of all supported configuration options. You can also run `hermes --help` to get an up-to-date including default values.
 
-| Environment                 | Flag                   | Description                                                                                            | Default        | Required |
-| --------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------ | -------------- | -------- |
-| `HERMES_SOCKET_ADDR`        | `--address`            | The address to bind the HTTP server to.                                                                | `0.0.0.0:8080` | YES      |
-| `HERMES_STORAGE_BACKEND`    | `--storage-backend`    | The storage backend to serve files from.                                                               | N/A            | YES      |
-| `HERMES_FILE_CACHE_DURATION | `--file-cache-duration | The duration of time to cache files for. Files will not be revalidated by the client during this time. | `1 minute      | NO       |
-| `RUST_LOG`                  | N/A                    | The log level to use for tracing.                                                                      | `info`         | NO       |
+| Environment                  | Flag                    | Description                                                                                            | Default        | Required |
+| ---------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------ | -------------- | -------- |
+| `HERMES_SOCKET_ADDR`         | `--address`             | The address to bind the HTTP server to.                                                                | `0.0.0.0:8080` | YES      |
+| `HERMES_STORAGE_BACKEND`     | `--storage-backend`     | The storage backend to serve files from.                                                               | N/A            | YES      |
+| `HERMES_FILE_CACHE_DURATION` | `--file-cache-duration` | The duration of time to cache files for. Files will not be revalidated by the client during this time. | `1 minute`     | NO       |
+| `RUST_LOG`                   | N/A                     | The log level to use for tracing.                                                                      | `info`         | NO       |
 
 ### SSHFS Backend
 
