@@ -4,14 +4,14 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "crates/**"
+      - "src/**"
       - "Cargo.toml"
       - "Cargo.lock"
   pull_request:
     branches: ["main"]
     types: [ready_for_review, opened, synchronize]
     paths:
-      - "crates/**"
+      - "src/**"
       - "Cargo.toml"
       - "Cargo.lock"
   workflow_dispatch:
