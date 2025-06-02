@@ -45,7 +45,7 @@ struct Arguments {
     storage: StorageBackend,
 
     /// The duration of time to cache files for. Files will not be revalidated by the client during this time.
-    #[clap(long = "file-cache-duration", env = "HERMES_FILE_CACHE_DURATION", value_parser = duration_range_value_parse!(min: 1min, max: 100years))]
+    #[clap(long = "file-cache-duration", env = "HERMES_FILE_CACHE_DURATION", default_value = "1min", value_parser = duration_range_value_parse!(min: 1min, max: 100years))]
     file_cache_duration: DurationHuman,
 }
 
