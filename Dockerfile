@@ -1,17 +1,20 @@
 # -----------
-#    BUILD   
+#    BUILD
 # -----------
-FROM rust:1-alpine as build
+FROM rust:1-alpine AS build
 WORKDIR /build
-
-# Build dependencies.
 RUN apk add --no-cache --update build-base
 
-# Build the project.
+# Pre-cache dependencies
 COPY ["Cargo.toml", "Cargo.lock", "./"]
-COPY crates/ crates/
-RUN cargo build --release --bin hermes
+RUN mkdir src \
+    && echo "// Placeholder" > src/lib.rs \
+    && cargo build --release \
+    && rm src/lib.rs
 
+# Build
+COPY src ./src
+RUN cargo build --release
 
 # -----------
 #   RUNTIME  
@@ -27,7 +30,7 @@ RUN addgroup -S hermes \
     && adduser -s /bin/false -S -G hermes -H -D hermes
 
 # Setup the default configuration for the container.
-RUN mkdir -p /app/mountpoint && chown -R hermes:hermes /app/mountpoint
+RUN mkdir -p /srv/dollhouse && chown -R hermes:hermes /srv/dollhouse
 ENV HERMES_ADDRESS=0.0.0.0:8080
 ENV RUST_LOG=info
 EXPOSE 8080
