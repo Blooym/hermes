@@ -30,7 +30,7 @@ RUN addgroup -S hermes \
     && adduser -s /bin/false -S -G hermes -H -D hermes
 
 # Setup the default configuration for the container.
-RUN mkdir -p /srv/dollhouse && chown -R hermes:hermes /srv/dollhouse
+RUN mkdir -p /srv/hermes && chown -R hermes:hermes /srv/hermes
 ENV HERMES_ADDRESS=0.0.0.0:8080
 ENV RUST_LOG=info
 EXPOSE 8080
