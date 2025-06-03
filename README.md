@@ -36,6 +36,8 @@ Hermes is configured via command-line flags or environment variables and has ful
 
 ### SSHFS Backend
 
+Please note that you may have to add `StrictHostKeyChecking=no` to `SSHFS_OPTIONS` if you do not already have the server host stored in `known_hosts` as otherwise the connection will hang waiting for the client to accept the key.
+
 | Variable                  | Description                                                                  | Required |
 | ------------------------- | ---------------------------------------------------------------------------- | -------- |
 | `SSHFS_CONNECTION_STRING` | The connection string to use for SSHFS.                                      | YES      |
