@@ -20,7 +20,6 @@ RUN cargo build --release
 #   RUNTIME  
 # -----------
 FROM alpine
-WORKDIR /app
 
 # Runtime dependencies.
 RUN apk add --no-cache --update sshfs fuse
