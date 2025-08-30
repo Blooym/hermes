@@ -3,6 +3,10 @@ name = "hermes"
 version = "0.1.0"
 edition = "2024"
 
+[profile.release]
+lto = true
+codegen-units = 1
+
 [features]
 default = ["storage-filesystem", "storage-s3", "storage-sshfs"]
 storage-filesystem = ["dep:faccess"]
