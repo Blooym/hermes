@@ -1,4 +1,4 @@
-use crate::storage::StorageOperations;
+use crate::storage::{FileMetadata, StorageOperations};
 use anyhow::Result;
 use std::path::{Component, Path, PathBuf};
 use tokio::io::{self, AsyncRead};
@@ -25,14 +25,14 @@ impl FilesystemStorage {
                 Component::Prefix(_) | Component::RootDir => {
                     return Err(io::Error::new(
                         io::ErrorKind::PermissionDenied,
-                        format!("Absolute paths are not allowed: {:?}", path),
+                        format!("Absolute paths are not allowed: {path:?}"),
                     )
                     .into());
                 }
                 Component::ParentDir => {
                     return Err(io::Error::new(
                         io::ErrorKind::PermissionDenied,
-                        format!("Paths cannot reference a parent directory: {:?}", path),
+                        format!("Paths cannot reference a parent directory: {path:?}"),
                     )
                     .into());
                 }
@@ -54,9 +54,15 @@ impl StorageOperations for FilesystemStorage {
         }
     }
 
-    async fn exists(&self, path: &Path) -> Result<bool> {
+    async fn metadata(&self, path: &Path) -> Result<Option<FileMetadata>> {
         let path = self.join_to_base(path)?;
-        debug!("Checking if a file exists at {path:?}");
-        Ok(tokio::fs::try_exists(path).await?)
+        debug!("Reading file metadata at {path:?}");
+        match tokio::fs::metadata(&path).await {
+            Ok(metadata) => Ok(Some(FileMetadata {
+                file_size: metadata.len().try_into()?,
+            })),
+            Err(err) if err.kind() == io::ErrorKind::NotFound => Ok(None),
+            Err(err) => Err(err.into()),
+        }
     }
 }

@@ -8,9 +8,13 @@ use std::{
 };
 use tokio::io::AsyncRead;
 
+pub struct FileMetadata {
+    pub file_size: usize,
+}
+
 pub trait StorageOperations {
     async fn read_stream(&self, path: &Path) -> Result<Option<Box<dyn AsyncRead + Unpin + Send>>>;
-    async fn exists(&self, path: &Path) -> Result<bool>;
+    async fn metadata(&self, path: &Path) -> Result<Option<FileMetadata>>;
 }
 
 #[derive(Debug, Clone)]
@@ -35,14 +39,14 @@ impl StorageOperations for StorageBackend {
         }
     }
 
-    async fn exists(&self, path: &Path) -> Result<bool> {
+    async fn metadata(&self, path: &Path) -> Result<Option<FileMetadata>> {
         match self {
             #[cfg(feature = "storage-filesystem")]
-            StorageBackend::Filesystem(storage) => storage.exists(path).await,
+            StorageBackend::Filesystem(storage) => storage.metadata(path).await,
             #[cfg(feature = "storage-s3")]
-            StorageBackend::S3(storage) => storage.exists(path).await,
+            StorageBackend::S3(storage) => storage.metadata(path).await,
             #[cfg(feature = "storage-sshfs")]
-            StorageBackend::Sshfs(storage) => storage.exists(path).await,
+            StorageBackend::Sshfs(storage) => storage.metadata(path).await,
         }
     }
 }

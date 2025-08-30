@@ -7,13 +7,13 @@ use axum::{
     extract::Request,
     http::{HeaderValue, header},
     middleware::{self as axum_middleware, Next},
-    routing::get,
+    routing::{get, head},
 };
 use clap::Parser;
 use clap_duration::duration_range_value_parse;
 use dotenvy::dotenv;
 use duration_human::{DurationHuman, DurationHumanValidator};
-use routes::{get_file_handler, get_file_root_handler};
+use routes::{get_file_handler, get_file_root_handler, head_file_handler, head_file_root_handler};
 use std::{net::SocketAddr, time::Duration};
 use storage::StorageBackend;
 use tokio::{net::TcpListener, signal};
@@ -75,7 +75,9 @@ async fn main() -> Result<()> {
     let tcp_listener = TcpListener::bind(args.address).await?;
     let router = Router::new()
         .route("/", get(get_file_root_handler))
+        .route("/", head(head_file_root_handler))
         .route("/{*path}", get(get_file_handler))
+        .route("/{*path}", head(head_file_handler))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))

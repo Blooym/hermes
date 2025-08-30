@@ -1,4 +1,4 @@
-use crate::storage::StorageOperations;
+use crate::storage::{FileMetadata, StorageOperations};
 use anyhow::{Context, Result, anyhow, bail};
 use aws_sdk_s3::Client;
 use std::path::Path;
@@ -71,7 +71,7 @@ impl StorageOperations for S3Storage {
         }
     }
 
-    async fn exists(&self, path: &Path) -> Result<bool> {
+    async fn metadata(&self, path: &Path) -> Result<Option<FileMetadata>> {
         debug!("Checking if {path:?} exists in bucket {}", self.bucket);
         match self
             .client
@@ -81,10 +81,12 @@ impl StorageOperations for S3Storage {
             .send()
             .await
         {
-            Ok(_) => Ok(true),
+            Ok(data) => Ok(Some(FileMetadata {
+                file_size: data.content_length.unwrap_or_default().try_into()?,
+            })),
             Err(err) => {
                 if err.as_service_error().map(|e| e.is_not_found()) == Some(true) {
-                    Ok(false)
+                    Ok(None)
                 } else {
                     Err(err.into())
                 }

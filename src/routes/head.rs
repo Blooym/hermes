@@ -7,24 +7,23 @@ use axum::{
 };
 use mime_guess::{MimeGuess, mime};
 use std::path::PathBuf;
-use tokio_util::io::ReaderStream;
 
-pub async fn get_file_root_handler(State(state): State<AppState>) -> impl IntoResponse {
-    serve_file(PathBuf::from("index.html"), state).await
+pub async fn head_file_root_handler(State(state): State<AppState>) -> impl IntoResponse {
+    file_metadata(PathBuf::from("index.html"), state).await
 }
 
-pub async fn get_file_handler(
+pub async fn head_file_handler(
     Path(mut path): Path<PathBuf>,
     State(state): State<AppState>,
 ) -> impl IntoResponse {
     if path.to_string_lossy().ends_with('/') {
         path.push("index.html");
     }
-    serve_file(path, state).await
+    file_metadata(path, state).await
 }
 
-async fn serve_file(path: PathBuf, state: AppState) -> impl IntoResponse {
-    let Some(reader) = state.storage.read_stream(&path).await.unwrap() else {
+async fn file_metadata(path: PathBuf, state: AppState) -> impl IntoResponse {
+    let Some(metadata) = state.storage.metadata(&path).await.unwrap() else {
         return StatusCode::NOT_FOUND.into_response();
     };
 
@@ -48,10 +47,8 @@ async fn serve_file(path: PathBuf, state: AppState) -> impl IntoResponse {
     }
 
     response_builder
-        .body(Body::from_stream(ReaderStream::with_capacity(
-            reader,
-            state.file_stream_buffersize,
-        )))
+        .header(header::CONTENT_LENGTH, metadata.file_size)
+        .body(Body::empty())
         .unwrap()
         .into_response()
 }

@@ -1,4 +1,4 @@
-use crate::storage::StorageOperations;
+use crate::storage::{FileMetadata, StorageOperations};
 use anyhow::{Context, Result, bail};
 use std::{
     io::Write,
@@ -136,9 +136,15 @@ impl StorageOperations for SSHFSStorage {
         }
     }
 
-    async fn exists(&self, path: &Path) -> Result<bool> {
+    async fn metadata(&self, path: &Path) -> Result<Option<FileMetadata>> {
         let path = Path::new(&self.mountpoint).join(path);
-        debug!("Checking if a file exists at {path:?}");
-        Ok(tokio::fs::try_exists(&path).await?)
+        debug!("Reading file metadata at {path:?}");
+        match tokio::fs::metadata(&path).await {
+            Ok(metadata) => Ok(Some(FileMetadata {
+                file_size: metadata.len().try_into()?,
+            })),
+            Err(err) if err.kind() == io::ErrorKind::NotFound => Ok(None),
+            Err(err) => Err(err.into()),
+        }
     }
 }
