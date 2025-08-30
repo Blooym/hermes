@@ -44,15 +44,24 @@ struct Arguments {
     #[arg(long = "storage", env = "HERMES_STORAGE_BACKEND")]
     storage: StorageBackend,
 
-    /// The duration of time to cache files for. Files will not be revalidated by the client during this time.
-    #[clap(long = "file-cache-duration", env = "HERMES_FILE_CACHE_DURATION", default_value = "1min", value_parser = duration_range_value_parse!(min: 1min, max: 100years))]
-    file_cache_duration: DurationHuman,
+    /// The duration of time to tell clients to cache files for.
+    #[clap(long = "file-cache-duration", env = "HERMES_FILE_CACHE_DURATION", value_parser = duration_range_value_parse!(min: 1min, max: 100years))]
+    file_cache_duration: Option<DurationHuman>,
+
+    /// The buffer size (in bytes) to use when streaming files from storage. Larger sizes may result in quicker file loads at the cost of increased memory usage for large files.
+    #[clap(
+        long = "file-stream-buffersize",
+        env = "HERMES_FILE_STREAM_BUFFERSIZE",
+        default_value_t = 64000 // 64kb
+    )]
+    file_stream_buffersize: usize,
 }
 
 #[derive(Clone)]
 struct AppState {
     storage: StorageBackend,
-    file_cache_duration: Duration,
+    file_cache_duration: Option<Duration>,
+    file_stream_buffersize: usize,
 }
 
 #[tokio::main]
@@ -90,7 +99,8 @@ async fn main() -> Result<()> {
         ))
         .with_state(AppState {
             storage: args.storage,
-            file_cache_duration: Duration::from(&args.file_cache_duration),
+            file_cache_duration: args.file_cache_duration.as_ref().map(Duration::from),
+            file_stream_buffersize: args.file_stream_buffersize,
         });
 
     info!(

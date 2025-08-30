@@ -2,6 +2,7 @@ use crate::storage::StorageOperations;
 use anyhow::{Context, Result, anyhow, bail};
 use aws_sdk_s3::Client;
 use std::path::Path;
+use tokio::io::AsyncRead;
 use tracing::debug;
 
 #[derive(Debug)]
@@ -49,8 +50,8 @@ impl S3Storage {
 }
 
 impl StorageOperations for S3Storage {
-    async fn read(&self, path: &Path) -> Result<Option<Vec<u8>>> {
-        debug!("Reading {path:?} from bucket {}", self.bucket);
+    async fn read_stream(&self, path: &Path) -> Result<Option<Box<dyn AsyncRead + Unpin + Send>>> {
+        debug!("Opening stream for {path:?} from bucket {}", self.bucket);
         match self
             .client
             .get_object()
@@ -59,10 +60,7 @@ impl StorageOperations for S3Storage {
             .send()
             .await
         {
-            Ok(output) => {
-                let data = output.body.collect().await?.into_bytes().to_vec();
-                Ok(Some(data))
-            }
+            Ok(output) => Ok(Some(Box::new(output.body.into_async_read()))),
             Err(err) => {
                 if err.as_service_error().map(|e| e.is_no_such_key()) == Some(true) {
                     Ok(None)

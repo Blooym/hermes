@@ -1,10 +1,7 @@
 use crate::storage::StorageOperations;
 use anyhow::Result;
-use std::{
-    fs::{self},
-    io::{self},
-    path::{Component, Path, PathBuf},
-};
+use std::path::{Component, Path, PathBuf};
+use tokio::io::{self, AsyncRead};
 use tracing::debug;
 
 #[derive(Debug)]
@@ -14,9 +11,9 @@ pub struct FilesystemStorage {
 
 impl FilesystemStorage {
     pub fn new(base_path: PathBuf) -> Result<Self> {
-        let _ = fs::create_dir_all(&base_path);
+        let _ = std::fs::create_dir_all(&base_path);
         Ok(Self {
-            base_path: fs::canonicalize(base_path)?,
+            base_path: std::fs::canonicalize(base_path)?,
         })
     }
 }
@@ -47,12 +44,12 @@ impl FilesystemStorage {
 }
 
 impl StorageOperations for FilesystemStorage {
-    async fn read(&self, path: &Path) -> Result<Option<Vec<u8>>> {
+    async fn read_stream(&self, path: &Path) -> Result<Option<Box<dyn AsyncRead + Unpin + Send>>> {
         let path = self.base_path.join(path);
         debug!("Reading file at {path:?}");
-        match fs::read(path) {
-            Ok(str) => Ok(Some(str)),
-            Err(err) if err.kind() == io::ErrorKind::NotFound => Ok(None),
+        match tokio::fs::File::open(&path).await {
+            Ok(file) => Ok(Some(Box::new(file))),
+            Err(err) if err.kind() == tokio::io::ErrorKind::NotFound => Ok(None),
             Err(err) => Err(err.into()),
         }
     }
@@ -60,6 +57,6 @@ impl StorageOperations for FilesystemStorage {
     async fn exists(&self, path: &Path) -> Result<bool> {
         let path = self.join_to_base(path)?;
         debug!("Checking if a file exists at {path:?}");
-        Ok(fs::exists(path)?)
+        Ok(tokio::fs::try_exists(path).await?)
     }
 }

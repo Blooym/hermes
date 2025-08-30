@@ -6,9 +6,10 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
+use tokio::io::AsyncRead;
 
 pub trait StorageOperations {
-    async fn read(&self, path: &Path) -> Result<Option<Vec<u8>>>;
+    async fn read_stream(&self, path: &Path) -> Result<Option<Box<dyn AsyncRead + Unpin + Send>>>;
     async fn exists(&self, path: &Path) -> Result<bool>;
 }
 
@@ -23,14 +24,14 @@ pub enum StorageBackend {
 }
 
 impl StorageOperations for StorageBackend {
-    async fn read(&self, path: &Path) -> Result<Option<Vec<u8>>> {
+    async fn read_stream(&self, path: &Path) -> Result<Option<Box<dyn AsyncRead + Unpin + Send>>> {
         match self {
             #[cfg(feature = "storage-filesystem")]
-            StorageBackend::Filesystem(storage) => storage.read(path).await,
+            StorageBackend::Filesystem(storage) => storage.read_stream(path).await,
             #[cfg(feature = "storage-s3")]
-            StorageBackend::S3(storage) => storage.read(path).await,
+            StorageBackend::S3(storage) => storage.read_stream(path).await,
             #[cfg(feature = "storage-sshfs")]
-            StorageBackend::Sshfs(storage) => storage.read(path).await,
+            StorageBackend::Sshfs(storage) => storage.read_stream(path).await,
         }
     }
 

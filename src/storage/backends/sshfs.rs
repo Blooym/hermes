@@ -1,11 +1,11 @@
 use crate::storage::StorageOperations;
 use anyhow::{Context, Result, bail};
 use std::{
-    fs,
     io::Write,
     path::{Path, PathBuf},
     process::Command,
 };
+use tokio::io::{self, AsyncRead};
 use tracing::debug;
 
 const SSHFS_BIN: &str = "sshfs";
@@ -29,9 +29,9 @@ impl SSHFSStorage {
             );
         };
         let mountpoint = mountpoint.into();
-        fs::create_dir_all(&mountpoint)?;
+        std::fs::create_dir_all(&mountpoint)?;
         let storage = Self {
-            mountpoint: fs::canonicalize(mountpoint)?,
+            mountpoint: std::fs::canonicalize(mountpoint)?,
             connection_string: std::env::var("SSHFS_CONNECTION_STRING")
                 .context("SSHFS_CONNECTION_STRING environment variable is required")?,
             password: std::env::var("SSHFS_PASSWORD").ok(),
@@ -126,12 +126,12 @@ impl Drop for SSHFSStorage {
 }
 
 impl StorageOperations for SSHFSStorage {
-    async fn read(&self, path: &Path) -> Result<Option<Vec<u8>>> {
+    async fn read_stream(&self, path: &Path) -> Result<Option<Box<dyn AsyncRead + Unpin + Send>>> {
         let path = Path::new(&self.mountpoint).join(path);
-        debug!("Reading file at {path:?}");
-        match fs::read(path) {
-            Ok(str) => Ok(Some(str)),
-            Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        debug!("Reading file stream {path:?}");
+        match tokio::fs::File::open(&path).await {
+            Ok(file) => Ok(Some(Box::new(file))),
+            Err(err) if err.kind() == io::ErrorKind::NotFound => Ok(None),
             Err(err) => Err(err.into()),
         }
     }
@@ -139,6 +139,6 @@ impl StorageOperations for SSHFSStorage {
     async fn exists(&self, path: &Path) -> Result<bool> {
         let path = Path::new(&self.mountpoint).join(path);
         debug!("Checking if a file exists at {path:?}");
-        Ok(fs::exists(&path)?)
+        Ok(tokio::fs::try_exists(&path).await?)
     }
 }
