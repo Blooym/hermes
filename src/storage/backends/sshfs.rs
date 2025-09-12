@@ -95,19 +95,19 @@ impl SSHFSStorage {
         }
         debug!("Mounting SSHFS with args {:?}", sshfs_cmd.get_args());
         let mut child = sshfs_cmd.spawn().context("Failed to spawn sshfs process")?;
-        if let Some(password) = &self.password {
-            if let Some(stdin) = child.stdin.take() {
-                debug!("Writing SSHFS password to sshfs process stdin");
-                let mut stdin = stdin;
-                stdin
-                    .write_all(password.as_bytes())
-                    .context("Failed to write password to sshfs")?;
-                stdin
-                    .write_all(b"\n")
-                    .context("Failed to write newline to sshfs")?;
-                stdin.flush().context("Failed to close stdin")?;
-                debug!("Finished writing SSHFS password");
-            }
+        if let Some(password) = &self.password
+            && let Some(stdin) = child.stdin.take()
+        {
+            debug!("Writing SSHFS password to sshfs process stdin");
+            let mut stdin = stdin;
+            stdin
+                .write_all(password.as_bytes())
+                .context("Failed to write password to sshfs")?;
+            stdin
+                .write_all(b"\n")
+                .context("Failed to write newline to sshfs")?;
+            stdin.flush().context("Failed to close stdin")?;
+            debug!("Finished writing SSHFS password");
         }
         debug!("SSHFS mount process completed - sshfs spawned as child process");
         Ok(())
