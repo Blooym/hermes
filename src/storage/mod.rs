@@ -83,7 +83,7 @@ impl FromStr for StorageBackend {
                     return Err("S3 bucket name cannot be empty".to_string());
                 }
                 Ok(Self::S3(Arc::new(
-                    backends::S3Storage::new(bucket.to_string())
+                    backends::S3Storage::new(bucket)
                         .map_err(|err| format!("failed to create S3 client: {err:?}"))?,
                 )))
             }

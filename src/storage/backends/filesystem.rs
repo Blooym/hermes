@@ -6,14 +6,15 @@ use tracing::debug;
 
 #[derive(Debug)]
 pub struct FilesystemStorage {
-    base_path: std::path::PathBuf,
+    base_path: Box<Path>,
 }
 
 impl FilesystemStorage {
-    pub fn new(base_path: PathBuf) -> Result<Self> {
-        let _ = std::fs::create_dir_all(&base_path);
+    pub fn new<P: AsRef<Path>>(base_path: P) -> Result<Self> {
+        let base_path = base_path.as_ref();
+        let _ = std::fs::create_dir_all(base_path);
         Ok(Self {
-            base_path: std::fs::canonicalize(base_path)?,
+            base_path: std::fs::canonicalize(base_path)?.into_boxed_path(),
         })
     }
 }
